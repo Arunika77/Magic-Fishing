@@ -88,7 +88,7 @@ object CompressedMachines {
                 // Energy per tick is multiplied (Long, clamped); the speed stays the same.
                 val energy = (spec.energy.toLong() * multiplier).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
                 val stack = SlimefunItemStack(
-                    id, spec.block, "&bMagic Fish Refinery ${roman(spec.tier)} &a(x$multiplier)",
+                    id, spec.block, "&aMagic Fish Refinery ${roman(spec.tier)} ($multiplier)",
                     *lore(energy, spec.seconds),
                     "",
                     "&7Combines &a$multiplier &7machines into one."

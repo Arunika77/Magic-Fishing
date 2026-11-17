@@ -189,7 +189,7 @@ There is a short grace period at the start, so players already holding Shift don
 ## 🗜️ Compressed machines
 
 A compressed **Magic Fish Refinery** combines several refineries into one: **x8, x16, x32 and x64**
-(each tier is a separate item, e.g. `MF_FISH_REFINERY_3_X64`).
+(each tier is a separate item, e.g. `Magic Fish Refinery III (64)`, ID `MF_FISH_REFINERY_3_X64`).
 
 | | |
 |---|---|
