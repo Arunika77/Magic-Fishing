@@ -1,0 +1,38 @@
+# Compressed Machine settings
+# A compressed machine combines multiple machines into one (x8, x16, x32, x64).
+# It keeps the speed of the original machine; one cycle does up to N operations at once,
+# and energy use is multiplied by the number of operations that actually run.
+#
+# Magic Fish Refinery: the number of fish in the input slot is the number of operations
+# per cycle, up to the multiplier (20 fish in a x64 refinery = 20 outputs per cycle).
+# Fish are never consumed. Output is only made if it fits in the output slots.
+#
+# Recipes (Compressor):
+#   x8  = 8 of the original machine
+#   x16 = 2 of the x8 machine
+#   x32 = 2 of the x16 machine
+#   x64 = 2 of the x32 machine
+#
+# Only the highest enabled multiplier is listed in the guide (Magic Fishing > Compressed Items);
+# the lower multipliers are still craftable.
+#
+# Changes require a server restart.
+# Missing options are added automatically, existing values are kept.
+
+# Enable/disable all the compressed machines
+enabled: true
+
+# Enable/disable each multiplier.
+# Disabling a multiplier also disables all the multipliers above it,
+# because their recipes need the previous multiplier.
+multipliers:
+  x8: true
+  x16: true
+  x32: true
+  x64: true
+
+# Enable/disable the compressed versions (all multipliers) of each machine
+machines:
+  MF_FISH_REFINERY_1: true
+  MF_FISH_REFINERY_2: true
+  MF_FISH_REFINERY_3: true

@@ -3,7 +3,10 @@ package id.irwan.magicfishing.machines
 import id.irwan.magicfishing.Fishes
 import id.irwan.magicfishing.Items
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup
+import id.irwan.magicfishing.icon
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType
+import org.bukkit.Material
 import io.github.thebusybiscuit.slimefun4.core.attributes.RecipeDisplayItem
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu
 import org.bukkit.inventory.ItemStack
@@ -11,20 +14,34 @@ import org.bukkit.inventory.ItemStack
 class FishRefinery(
     group: ItemGroup,
     item: SlimefunItemStack,
+    recipeType: RecipeType,
     recipe: Array<ItemStack?>,
     energy: Int,
-    seconds: Int
-) : MagicMachine(group, item, recipe, energy, seconds, LAYOUT), RecipeDisplayItem {
+    seconds: Int,
+    multiplier: Int = 1
+) : MagicMachine(group, item, recipeType, recipe, energy, seconds, LAYOUT, multiplier), RecipeDisplayItem {
 
+    /**
+     * The fish is never consumed. For compressed refineries the number of fish in the slot is the
+     * number of operations per cycle (up to the multiplier): 20 fish in a x64 refinery = 20 outputs.
+     */
     override fun findOutput(menu: BlockMenu): WorkResult {
-        val fish = Items.fishOf(menu.getItemInSlot(layout.inputs[0]))
-            ?: return WorkResult(null, "Insert a magic fish")
+        val stack = menu.getItemInSlot(layout.inputs[0])
+        val fish = Items.fishOf(stack) ?: return WorkResult(null, "Insert a magic fish")
         val out = fish.output() ?: return WorkResult(null, "Output for this fish not found")
-        return WorkResult(out, "")
+        return WorkResult(out, "", stack.amount)
     }
 
-    override fun getDisplayRecipes(): List<ItemStack> =
-        Fishes.all.flatMap { listOf(Items.fishItem(it), it.outputDisplay()) }
+    override fun getDisplayRecipes(): List<ItemStack?> {
+        val recipes = Fishes.all.flatMap { listOf(Items.fishItem(it), it.outputDisplay()) }
+        if (multiplier <= 1) return recipes
+        val info = icon(
+            Material.KNOWLEDGE_BOOK, "&aMultiplier: x$multiplier",
+            "", "&7Combines &f$multiplier &7refineries into one.",
+            "&7Each fish in the input slot is one", "&7operation, up to &f$multiplier &7per cycle."
+        )
+        return listOf(info, null) + recipes
+    }
 
     companion object {
         /*

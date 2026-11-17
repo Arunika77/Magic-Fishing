@@ -186,6 +186,35 @@ There is a short grace period at the start, so players already holding Shift don
 
 ---
 
+## 🗜️ Compressed machines
+
+A compressed **Magic Fish Refinery** combines several refineries into one: **x8, x16, x32 and x64**
+(each tier is a separate item, e.g. `MF_FISH_REFINERY_3_X64`).
+
+| | |
+|---|---|
+| Recipe (Compressor) | x8 = 8× original, x16 = 2× x8, x32 = 2× x16, x64 = 2× x32 |
+| Speed | Same as the original refinery |
+| Operations per cycle | Number of fish in the input slot, up to the multiplier (20 fish in a x64 = 20 outputs) |
+| Energy | Energy per tick × the operations that actually run |
+| Output | Split into valid stacks; only what fits in the output slots is made, nothing is lost |
+
+Find them in **Magic Fishing > Compressed Items** (slot 40). Only the highest enabled tier is listed;
+lower tiers are still craftable. Settings are in `plugins/MagicFishing/compressed.yml`:
+
+```yaml
+enabled: true
+multipliers: { x8: true, x16: true, x32: true, x64: true }   # disabling one also disables the tiers above
+machines:
+  MF_FISH_REFINERY_1: true
+  MF_FISH_REFINERY_2: true
+  MF_FISH_REFINERY_3: true
+```
+
+Changes need a server restart. Missing options are added automatically.
+
+---
+
 ## 🐠 Magic Aquarium
 
 - Put **2 fish of the same type** and **Fish Pellet** in the aquarium (pellets can also come from cargo).

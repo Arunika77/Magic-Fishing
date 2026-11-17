@@ -185,6 +185,7 @@ object Items {
         val refineryEnergy = mapOf(1 to 100, 2 to 250, 3 to 1000)
         val refineryBlocks = mapOf(1 to Material.PRISMARINE, 2 to Material.PRISMARINE_BRICKS, 3 to Material.DARK_PRISMARINE)
         var prevRefinery: ItemStack? = null
+        val refinerySpecs = ArrayList<CompressedMachines.RefinerySpec>()
         for (tier in 1..3) {
             val id = "MF_FISH_REFINERY_$tier"
             val energy = cInt("machines.$id.energy-per-tick", refineryEnergy.getValue(tier))
@@ -216,9 +217,10 @@ object Items {
                         "&7The fish is &fnever consumed&7."
                     )
                 ),
-                recipe, energy, seconds
+                RecipeType.ENHANCED_CRAFTING_TABLE, recipe, energy, seconds
             ).register(Addon)
             prevRefinery = sf(id)
+            refinerySpecs.add(CompressedMachines.RefinerySpec(id, tier, refineryBlocks.getValue(tier), energy, seconds))
         }
 
         val aqEnergy = cInt("machines.$AQUARIUM.energy-per-tick", 150)
@@ -243,6 +245,25 @@ object Items {
             ),
             aqEnergy, aqSeconds, aqPellets
         ).register(Addon)
+
+        // ===== Compressed machines (compressed.yml) =====
+        val gCompressed = GuideGroup(key("mf_compressed"), GuideGroup.compressedIcon(), parent = main)
+        val gCompressedMachine = SubItemGroup(
+            key("mf_compressed_machine"), gCompressed, icon(Material.PRISMARINE_BRICKS, "&aCompressed Machine")
+        )
+        val gHidden = HiddenGroup(key("mf_hidden"), icon(Material.BARRIER, "&7Hidden"))
+        gCompressed.register(Addon)
+        gCompressedMachine.register(Addon)
+        gHidden.register(Addon)
+        main.compressed = gCompressed
+        val compressedCount = CompressedMachines.register(plugin, refinerySpecs, gCompressedMachine, gHidden) { energy, seconds ->
+            machineLore(
+                energy, seconds, "output",
+                "&7Turns magic fish into their resource.",
+                "&7Fish are &fnever consumed&7."
+            )
+        }
+        if (compressedCount > 0) plugin.logger.info("Registered $compressedCount compressed machines.")
 
         // ===== Research (costs can be changed in plugins/Slimefun/Researches.yml) =====
         fun research(k: String, id: Int, name: String, cost: Int, vararg ids: String) {

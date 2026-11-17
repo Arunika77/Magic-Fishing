@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.core.services.sounds.SoundEffect
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun
 import io.github.thebusybiscuit.slimefun4.implementation.guide.SurvivalSlimefunGuide
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
@@ -21,12 +22,27 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 /**
- * The Magic Fishing guide category. Same layout as Slimefun's [NestedItemGroup],
- * plus a GitHub button in the top middle slot.
+ * The Magic Fishing guide category. Same layout as Slimefun's [NestedItemGroup], plus a GitHub
+ * button in the top middle slot and a "Compressed Items" button in slot 40.
+ *
+ * With a [parent] it is a sub menu (e.g. Compressed Items): it is not listed in the Slimefun main
+ * menu, it has no extra buttons and its back button returns to the parent.
  */
-class GuideGroup(key: NamespacedKey, item: ItemStack) : NestedItemGroup(key, item) {
+class GuideGroup(
+    key: NamespacedKey,
+    item: ItemStack,
+    private val parent: GuideGroup? = null
+) : NestedItemGroup(key, item) {
 
     private val groups = ArrayList<SubItemGroup>()
+
+    /** The Compressed Items menu opened from slot 40 (root menu only). */
+    var compressed: GuideGroup? = null
+
+    override fun isVisible(p: Player, profile: PlayerProfile, mode: SlimefunGuideMode): Boolean =
+        parent == null && mode == SlimefunGuideMode.SURVIVAL_MODE
+
+    private fun hasVisibleGroups(p: Player): Boolean = groups.any { it.isVisibleInNested(p) }
 
     override fun addSubGroup(group: SubItemGroup) {
         super.addSubGroup(group)
@@ -57,22 +73,34 @@ class GuideGroup(key: NamespacedKey, item: ItemStack) : NestedItemGroup(key, ite
             1,
             ChestMenuUtils.getBackButton(p, "", ChatColor.GRAY.toString() + Slimefun.getLocalization().getMessage(p, "guide.back.guide"))
         ) { _, _, _, _ ->
-            SlimefunGuide.openMainMenu(profile, mode, history.mainMenuPage)
+            if (parent != null) SlimefunGuide.openItemGroup(profile, parent, mode, 1)
+            else SlimefunGuide.openMainMenu(profile, mode, history.mainMenuPage)
             false
         }
 
-        // GitHub button (top middle).
-        menu.addItem(4, GITHUB_BUTTON) { pl, _, _, _ ->
-            pl.closeInventory()
-            sendGithubLink(pl)
-            false
+        val compressedMenu = compressed?.takeIf { parent == null && it.hasVisibleGroups(p) }
+        if (parent == null) {
+            // GitHub button (top middle).
+            menu.addItem(4, GITHUB_BUTTON) { pl, _, _, _ ->
+                pl.closeInventory()
+                sendGithubLink(pl)
+                false
+            }
+        }
+        if (compressedMenu != null) {
+            menu.addItem(COMPRESSED_SLOT, compressedMenu.getItem(p)) { _, _, _, _ ->
+                SlimefunGuide.openItemGroup(profile, compressedMenu, mode, 1)
+                false
+            }
         }
 
+        // Group slots 9..44, keeping slot 40 free for the Compressed Items button.
+        val slots = (9 until 9 + GROUP_SIZE).filter { compressedMenu == null || it != COMPRESSED_SLOT }
         val visible = groups.filter { it.isVisibleInNested(p) }
-        val pages = maxOf(1, (visible.size + GROUP_SIZE - 1) / GROUP_SIZE)
+        val pages = maxOf(1, (visible.size + slots.size - 1) / slots.size)
         val current = page.coerceIn(1, pages)
-        visible.drop((current - 1) * GROUP_SIZE).take(GROUP_SIZE).forEachIndexed { i, group ->
-            menu.addItem(9 + i, group.getItem(p)) { _, _, _, _ ->
+        visible.drop((current - 1) * slots.size).take(slots.size).forEachIndexed { i, group ->
+            menu.addItem(slots[i], group.getItem(p)) { _, _, _, _ ->
                 SlimefunGuide.openItemGroup(profile, group, mode, 1)
                 false
             }
@@ -92,6 +120,19 @@ class GuideGroup(key: NamespacedKey, item: ItemStack) : NestedItemGroup(key, ite
 
     companion object {
         private const val GROUP_SIZE = 36
+        private const val COMPRESSED_SLOT = 40
+
+        /** Mybezo skin head, used as the Compressed Items icon. */
+        private const val COMPRESSED_TEXTURE = "82600941fab88efc41bb132d873d3b5c5f35f7720ebd9375476c1a18955bb03e"
+
+        fun compressedIcon(): ItemStack {
+            val head = SlimefunUtils.getCustomHead(COMPRESSED_TEXTURE)
+            val meta = head.itemMeta ?: return head
+            meta.setDisplayName(color("&aCompressed Items"))
+            meta.lore = listOf("", color("&7Machines combined into one"), color("&7(x8, x16, x32, x64)"))
+            head.itemMeta = meta
+            return head
+        }
 
         private val GITHUB_BUTTON: ItemStack = icon(
             Material.WRITABLE_BOOK, "&bMagic Fishing on GitHub",
