@@ -138,7 +138,7 @@ Items that don't exist on your server version (e.g. Pale Oak on 1.20) are skippe
 | **Uncommon** | Aluminum, Copper, Tin, Silver, Lead, Zinc and Magnesium Ingot · 4K to 10K Gold · Magical Lump I, Ender Lump I · Carbon, Silicon |
 | **Rare** | Nickel, Cobalt · 12K to 18K Gold · Bronze, Brass, Billon, Solder, Steel, Aluminum Brass, Aluminum Bronze · Heating Coil, Electromagnet, Electric Motor · Magical Lump II, Ender Lump II · Compressed Carbon, Ferrosilicon, Magnesium Salt, Synthetic Sapphire, Oil Bucket |
 | **Epic** | 20K to 24K Gold · Duralumin, Corinthian Bronze, Damascus Steel, Redstone Alloy, Gilded Iron, Hardened Metal · Plastic Sheet, Uranium, Blistering Ingot (33%), Blistering Ingot (66%) · Magical Lump III, Ender Lump III · Carbon Chunk, Raw Carbonado, Synthetic Diamond, Synthetic Emerald, Fuel Bucket |
-| **Legendary** | Reinforced Alloy Ingot, Blistering Ingot · Carbonado, Plutonium, Enriched Nether Ice |
+| **Legendary** | Reinforced Alloy Ingot, Blistering Ingot · Carbonado |
 
 </details>
 
