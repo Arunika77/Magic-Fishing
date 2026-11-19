@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **More Slimefun fish**: the rest of the Slimefun Resources category: Sulfate, Carbon, Silicon, Compressed Carbon, Ferrosilicon, Magnesium Salt, Synthetic Sapphire, Oil Bucket, Carbon Chunk, Raw Carbonado, Synthetic Diamond, Synthetic Emerald, Fuel Bucket, Carbonado, Plutonium and Enriched Nether Ice (Boosted Uranium, Nether Ice and Neptunium are left out).
 - **Machine time**: `machines.<ID>.seconds-per-output` now accepts decimals (minimum 0.5 s, rounded to Slimefun ticks). 0 or negative values fall back to the default with a console warning. `config.yml` explains the machine options in comments. Defaults are unchanged.
 - **Compressed Magic Fish Refinery** (x8 / x16 / x32 / x64), crafted in the Compressor. Same speed as the original; each fish in the input slot is one operation per cycle, up to the multiplier, with energy multiplied by the operations that run. Output is split into valid stacks and only made if it fits. Guide: Magic Fishing > Compressed Items (slot 40). Config: `compressed.yml`.
 - **Rod bait holds up to 64 Fish Pellets** (`fishing.max-bait`). Left click the rod with pellets to load as many as fit, right click to load 1. Each fish caught uses 1 pellet, and the lore shows the count (e.g. `Bait: 37/64 Fish Pellet`). Rods baited in 1.0.0-dev.1 keep their 1 bait.

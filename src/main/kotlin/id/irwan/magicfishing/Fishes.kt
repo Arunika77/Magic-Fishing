@@ -323,8 +323,31 @@ object Fishes {
         sf("BLISTERING_INGOT_3", "Blistering Ingot", Rarity.LEGENDARY)
     )
 
+    /**
+     * The rest of Slimefun's "Resources" category (the ingots, dusts, alloys, carat gold, Uranium and
+     * Blistering Ingots are already above). Boosted Uranium, Nether Ice and Neptunium are left out.
+     */
+    private val slimefunResources = listOf(
+        sf("SULFATE", "Sulfate", Rarity.COMMON),
+        sf("CARBON", "Carbon", Rarity.UNCOMMON),
+        sf("SILICON", "Silicon", Rarity.UNCOMMON),
+        sf("COMPRESSED_CARBON", "Compressed Carbon", Rarity.RARE),
+        sf("FERROSILICON", "Ferrosilicon", Rarity.RARE),
+        sf("MAGNESIUM_SALT", "Magnesium Salt", Rarity.RARE),
+        sf("SYNTHETIC_SAPPHIRE", "Synthetic Sapphire", Rarity.RARE),
+        sf("OIL_BUCKET", "Oil Bucket", Rarity.RARE),
+        sf("CARBON_CHUNK", "Carbon Chunk", Rarity.EPIC),
+        sf("RAW_CARBONADO", "Raw Carbonado", Rarity.EPIC),
+        sf("SYNTHETIC_DIAMOND", "Synthetic Diamond", Rarity.EPIC),
+        sf("SYNTHETIC_EMERALD", "Synthetic Emerald", Rarity.EPIC),
+        sf("FUEL_BUCKET", "Fuel Bucket", Rarity.EPIC),
+        sf("CARBONADO", "Carbonado", Rarity.LEGENDARY),
+        sf("PLUTONIUM", "Plutonium", Rarity.LEGENDARY),
+        sf("ENRICHED_NETHER_ICE", "Enriched Nether Ice", Rarity.LEGENDARY)
+    )
+
     val all: List<FishType> =
-        (ores + logs + leaves + mobDrops + coloredBlocks + earth + farm + pelletIngredients + dyes + flowers + honey).filterNotNull() + slimefunDusts + slimefunIngots + slimefunAlloys + slimefunComponents
+        (ores + logs + leaves + mobDrops + coloredBlocks + earth + farm + pelletIngredients + dyes + flowers + honey).filterNotNull() + slimefunDusts + slimefunIngots + slimefunAlloys + slimefunComponents + slimefunResources
 
     /** Chance (%) that a catch is a Slimefun fish instead of a Minecraft fish (configurable). */
     var slimefunChance: Double = 50.0
