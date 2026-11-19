@@ -34,7 +34,7 @@ object CompressedMachines {
         val tier: Int,
         val block: Material,
         val energy: Int,
-        val seconds: Int
+        val seconds: Double
     )
 
     /** Loads compressed.yml, adding missing options without touching existing values. */
@@ -66,7 +66,7 @@ object CompressedMachines {
         refineries: List<RefinerySpec>,
         visibleGroup: ItemGroup,
         hiddenGroup: ItemGroup,
-        lore: (energy: Int, seconds: Int) -> Array<String>
+        lore: (energy: Int, seconds: Double) -> Array<String>
     ): Int {
         val cfg = loadConfig(plugin, refineries)
         if (!cfg.getBoolean("enabled", true)) return 0

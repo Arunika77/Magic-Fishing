@@ -48,6 +48,33 @@ object Items {
         fun cInt(path: String, def: Int): Int { cfg.addDefault(path, def); return cfg.getInt(path, def) }
         fun key(k: String) = NamespacedKey(plugin, k)
 
+        /**
+         * Machine time in real seconds (default Slimefun ticker: 10 game ticks = 0.5 s).
+         * Decimals are allowed, minimum 0.5. 0 / negative / not a number -> default, with a warning.
+         * The value is written to the file if missing, existing values are kept.
+         */
+        fun cSeconds(path: String, def: Double): Double {
+            if (!cfg.isSet(path)) cfg.set(path, configNumber(def))
+            val raw = cfg.get(path)
+            val value = (raw as? Number)?.toDouble() ?: raw?.toString()?.toDoubleOrNull()
+            if (value == null || value <= 0.0 || value.isNaN() || value.isInfinite()) {
+                plugin.logger.warning("Invalid $path: $raw (must be above 0). Using the default: ${formatSeconds(def)} s.")
+                return def
+            }
+            if (value < MIN_SECONDS) {
+                plugin.logger.warning("$path: $value s is below the minimum, using ${formatSeconds(MIN_SECONDS)} s.")
+                return MIN_SECONDS
+            }
+            // Machines run on Slimefun ticks, so the time is rounded to the nearest tick.
+            val rate = maxOf(1, io.github.thebusybiscuit.slimefun4.implementation.Slimefun.getTickerTask().tickRate)
+            val ticks = maxOf(1L, Math.round(value * 20.0 / rate))
+            val real = ticks * rate / 20.0
+            if (kotlin.math.abs(real - value) > 1e-9) {
+                plugin.logger.info("$path: $value s rounded to ${formatSeconds(real)} s (Slimefun tick = ${formatSeconds(rate / 20.0)} s).")
+            }
+            return real
+        }
+
 
         // Config migration: apply the new machine timers and drop removed settings on old configs.
         val configVersion = cfg.getInt("config-version", 1)
@@ -174,12 +201,12 @@ object Items {
         }
 
         // ===== Machine =====
-        fun machineLore(energy: Int, seconds: Int, unit: String, vararg info: String): Array<String> = arrayOf(
+        fun machineLore(energy: Int, seconds: Double, unit: String, vararg info: String): Array<String> = arrayOf(
             "", *info,
             "",
             "&8\u25B8 &7Energy: &e$energy J/tick",
             "&8\u25B8 &7Buffer: &e${energy * 2} J",
-            "&8\u25B8 &7Speed: &f1 $unit every $seconds s"
+            "&8\u25B8 &7Speed: &f1 $unit every ${formatSeconds(seconds)} s"
         )
 
         val refineryEnergy = mapOf(1 to 100, 2 to 250, 3 to 1000)
@@ -189,7 +216,7 @@ object Items {
         for (tier in 1..3) {
             val id = "MF_FISH_REFINERY_$tier"
             val energy = cInt("machines.$id.energy-per-tick", refineryEnergy.getValue(tier))
-            val seconds = cInt("machines.$id.seconds-per-output", REFINERY_SECONDS.getValue(tier))
+            val seconds = cSeconds("machines.$id.seconds-per-output", REFINERY_SECONDS.getValue(tier).toDouble())
             val recipe: Array<ItemStack?> = when (tier) {
                 1 -> arrayOf(
                     sf("HARDENED_METAL_INGOT"), aqua, sf("HARDENED_METAL_INGOT"),
@@ -224,7 +251,7 @@ object Items {
         }
 
         val aqEnergy = cInt("machines.$AQUARIUM.energy-per-tick", 150)
-        val aqSeconds = cInt("machines.$AQUARIUM.seconds-per-output", 180)
+        val aqSeconds = cSeconds("machines.$AQUARIUM.seconds-per-output", 180.0)
         MagicAquarium(
             gMachine,
             SlimefunItemStack(
@@ -279,9 +306,40 @@ object Items {
         research("fish_refinery_3", 78_350_06, "Magic Fish Refinery III", 45, "MF_FISH_REFINERY_3")
         research("magic_aquarium", 78_350_07, "Magic Aquarium", 30, AQUARIUM)
 
+        cfg.setComments("machines", MACHINES_COMMENT)
+
         cfg.options().copyDefaults(true)
         plugin.saveConfig()
     }
+
+    /** Minimum machine time: one Slimefun tick with the default ticker. */
+    private const val MIN_SECONDS = 0.5
+
+    private val MACHINES_COMMENT = listOf(
+        "Machine settings. Changes need a server restart.",
+        "",
+        "seconds-per-output: time per output (Refinery) or per new fish (Aquarium),",
+        "  in real seconds with the default Slimefun ticker (10 game ticks = 0.5 s).",
+        "  Decimals are allowed (e.g. 2.5), minimum 0.5; other values are rounded to 0.5 s.",
+        "  0 or negative values are ignored (the default is used) and logged in the console.",
+        "  Compressed refineries (x8 - x64) use the time of their original refinery.",
+        "energy-per-tick: energy used per Slimefun tick (compressed: multiplied by the batch).",
+        "",
+        "Example:",
+        "  MF_FISH_REFINERY_1:",
+        "    energy-per-tick: 100",
+        "    seconds-per-output: 15",
+        "",
+        "Defaults: Refinery I 15 s, II 8 s, III 2 s, Magic Aquarium 180 s."
+    )
+
+    /** "15" for whole seconds, "2.5" otherwise. */
+    fun formatSeconds(seconds: Double): String =
+        if (seconds == Math.rint(seconds)) seconds.toLong().toString()
+        else String.format(java.util.Locale.ROOT, "%.2f", seconds).trimEnd('0').trimEnd('.')
+
+    /** Whole numbers are stored without decimals. */
+    private fun configNumber(seconds: Double): Any = if (seconds == Math.rint(seconds)) seconds.toInt() else seconds
 
     /**
      * Settings that can be changed with /mf reload (no restart needed).

@@ -293,6 +293,26 @@ machines:
   MF_MAGIC_AQUARIUM:  { energy-per-tick: 150,  seconds-per-output: 180, pellets-per-fish: 16 }
 ```
 
+### ⏱️ Machine time
+
+`machines.<ID>.seconds-per-output` sets how long a machine takes per output (Refinery) or per new fish
+(Aquarium). Every tier has its own entry.
+
+| Machine | ID | Default |
+|---|---|---|
+| Magic Fish Refinery I | `MF_FISH_REFINERY_1` | 15 s |
+| Magic Fish Refinery II | `MF_FISH_REFINERY_2` | 8 s |
+| Magic Fish Refinery III | `MF_FISH_REFINERY_3` | 2 s |
+| Magic Aquarium | `MF_MAGIC_AQUARIUM` | 180 s |
+
+- **Unit:** real seconds with the default Slimefun ticker (10 game ticks = 0.5 s). Decimals are allowed
+  (e.g. `2.5`), the minimum is `0.5`; other values are rounded to the nearest 0.5 s.
+- `0`, negative or invalid values are ignored: the default is used and a warning is logged.
+- Compressed refineries (x8 to x64) use the time of their original refinery.
+- Missing entries are added automatically on start; existing values are kept.
+- Changes need a **server restart**.
+
+
 `/mf reload` applies the `fishing` and `minigame` settings right away. Machine energy and speed, the
 aquarium pellet cost and the chances shown in item lore are applied after a **restart**.
 

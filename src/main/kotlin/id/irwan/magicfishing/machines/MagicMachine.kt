@@ -51,7 +51,7 @@ abstract class MagicMachine(
     recipeType: RecipeType,
     recipe: Array<ItemStack?>,
     private val energy: Int,
-    private val seconds: Int,
+    private val seconds: Double,
     protected val layout: MachineLayout,
     final override val multiplier: Int = 1
 ) : SlimefunItem(group, item, recipeType, recipe), EnergyNetComponent, Compressible {
@@ -61,7 +61,7 @@ abstract class MagicMachine(
         item: SlimefunItemStack,
         recipe: Array<ItemStack?>,
         energy: Int,
-        seconds: Int,
+        seconds: Double,
         layout: MachineLayout
     ) : this(group, item, RecipeType.ENHANCED_CRAFTING_TABLE, recipe, energy, seconds, layout, 1)
 
@@ -103,6 +103,7 @@ abstract class MagicMachine(
 
     private fun ticksNeeded(): Int {
         val rate = max(1, Slimefun.getTickerTask().tickRate)
+        // seconds are real seconds; one Slimefun tick is [rate] game ticks (20 game ticks = 1 s)
         return max(1, (seconds * 20.0 / rate).roundToInt())
     }
 

@@ -11,7 +11,7 @@ class MagicAquarium(
     item: SlimefunItemStack,
     recipe: Array<ItemStack?>,
     energy: Int,
-    seconds: Int,
+    seconds: Double,
     private val pelletsPerFish: Int
 ) : MagicMachine(group, item, recipe, energy, seconds, LAYOUT) {
 

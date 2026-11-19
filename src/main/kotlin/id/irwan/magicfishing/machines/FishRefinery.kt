@@ -17,7 +17,7 @@ class FishRefinery(
     recipeType: RecipeType,
     recipe: Array<ItemStack?>,
     energy: Int,
-    seconds: Int,
+    seconds: Double,
     multiplier: Int = 1
 ) : MagicMachine(group, item, recipeType, recipe, energy, seconds, LAYOUT, multiplier), RecipeDisplayItem {
 
