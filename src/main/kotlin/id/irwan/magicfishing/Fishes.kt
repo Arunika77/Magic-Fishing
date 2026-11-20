@@ -143,8 +143,12 @@ object Fishes {
 
     private fun mc(rarity: Rarity, vararg materials: String): List<FishType?> = materials.map { mc(it, null, rarity, it) }
 
-    private fun sf(sfId: String, name: String, rarity: Rarity) =
-        FishType("MF_FISH_SF_$sfId", name, rarity, true, outputId = sfId)
+    /**
+     * A Slimefun resource fish. [sfId] is the real Slimefun item id of the output;
+     * [key] names the fish (MF_FISH_SF_<key>) and defaults to the same id.
+     */
+    private fun sf(sfId: String, name: String, rarity: Rarity, key: String = sfId) =
+        FishType("MF_FISH_SF_$key", name, rarity, true, outputId = sfId)
 
     // ===================== Minecraft resources =====================
 
@@ -336,12 +340,13 @@ object Fishes {
         sf("FERROSILICON", "Ferrosilicon", Rarity.RARE),
         sf("MAGNESIUM_SALT", "Magnesium Salt", Rarity.RARE),
         sf("SYNTHETIC_SAPPHIRE", "Synthetic Sapphire", Rarity.RARE),
-        sf("OIL_BUCKET", "Oil Bucket", Rarity.RARE),
+        // Slimefun's item ids are BUCKET_OF_OIL / BUCKET_OF_FUEL; the fish keep their first ids.
+        sf("BUCKET_OF_OIL", "Oil Bucket", Rarity.RARE, key = "OIL_BUCKET"),
         sf("CARBON_CHUNK", "Carbon Chunk", Rarity.EPIC),
         sf("RAW_CARBONADO", "Raw Carbonado", Rarity.EPIC),
         sf("SYNTHETIC_DIAMOND", "Synthetic Diamond", Rarity.EPIC),
         sf("SYNTHETIC_EMERALD", "Synthetic Emerald", Rarity.EPIC),
-        sf("FUEL_BUCKET", "Fuel Bucket", Rarity.EPIC),
+        sf("BUCKET_OF_FUEL", "Fuel Bucket", Rarity.EPIC, key = "FUEL_BUCKET"),
         sf("CARBONADO", "Carbonado", Rarity.LEGENDARY)
     )
 
