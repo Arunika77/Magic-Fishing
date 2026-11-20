@@ -28,11 +28,12 @@ import org.bukkit.inventory.EquipmentSlot
 class FishingListener : Listener {
 
     /**
-     * Players whose last cast was made with a baited Magic Fishing Rod. Tracked per player (not per
-     * hook entity, whose id is not reliable across events on every server); a cast with any other
-     * rod clears it.
+     * Players whose last cast was made with a rod that is NOT a baited Magic Fishing Rod (e.g. an
+     * enchanted vanilla rod). Their catch stays vanilla even if they swap to the Magic Rod before
+     * reeling in. Tracked per player; if a server never fires the cast event for us, nothing is
+     * marked and catches with a baited Magic Rod work as before.
      */
-    private val magicCasters: MutableSet<java.util.UUID> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+    private val otherRodCasters: MutableSet<java.util.UUID> = java.util.concurrent.ConcurrentHashMap.newKeySet()
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onFish(e: PlayerFishEvent) {
@@ -45,9 +46,11 @@ class FishingListener : Listener {
         val playerId = e.player.uniqueId
 
         if (e.state == PlayerFishEvent.State.FISHING) {
-            // A cast with any other rod (e.g. an enchanted vanilla rod) is not a magic cast.
-            magicCasters.remove(playerId)
-            if (!Items.isRod(rod)) return
+            if (!Items.isRod(rod)) {
+                // A cast with any other rod (e.g. an enchanted vanilla rod) is not a magic cast.
+                otherRodCasters.add(playerId)
+                return
+            }
             // No casting while the minigame is running, and every cast needs bait.
             if (Minigame.isPlaying(e.player)) {
                 e.isCancelled = true
@@ -55,15 +58,15 @@ class FishingListener : Listener {
                 e.isCancelled = true
                 actionBar(e.player, "&cBait your rod first: &7click it with &6Fish Pellet &7in your inventory")
             } else {
-                magicCasters.add(playerId)
+                otherRodCasters.remove(playerId)
             }
             return
         }
 
         if (e.state != PlayerFishEvent.State.CAUGHT_FISH) return
-        // Magic fish only when the cast was made with a baited Magic Rod AND the rod in use now is
-        // still that baited Magic Rod (swapping rods while the hook is out gives vanilla fish).
-        if (playerId !in magicCasters || !Items.isRod(rod) || !Bait.isBaited(rod)) return
+        // Magic fish only with a baited Magic Rod in the hand that is used, and not when the hook was
+        // cast with another rod (swapping rods while the hook is out gives vanilla fish).
+        if (playerId in otherRodCasters || !Items.isRod(rod) || !Bait.isBaited(rod)) return
         val caught = e.caught as? Item ?: return
 
         // Each fish caught uses 1 pellet. Reeling in without a fish keeps the bait.
@@ -197,6 +200,6 @@ class FishingListener : Listener {
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         Minigame.stop(e.player, success = false, silent = true)
-        magicCasters.remove(e.player.uniqueId)
+        otherRodCasters.remove(e.player.uniqueId)
     }
 }
