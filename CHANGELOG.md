@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **NetworksExpansion**: Magic Fishing recipes (Enhanced Crafting Table, Magic Workbench, Compressor) are added to the Networks encoders after start-up, so blueprints can be encoded even when Networks built its recipe list before Magic Fishing loaded.
 - **Fix**: magic fish are only caught with a hook cast by the Magic Fishing Rod itself (the rod in the hand that is actually used). A normal or enchanted rod in the other hand, or swapping rods while the hook is out, no longer gives magic fish.
 - **Fix**: Networks Grabber (and other cargo that passes no item) no longer crashes on Magic Fishing machines.
 - **Fix**: Oil Bucket and Fuel Bucket fish now produce their bucket (Slimefun ids `BUCKET_OF_OIL` / `BUCKET_OF_FUEL`).
