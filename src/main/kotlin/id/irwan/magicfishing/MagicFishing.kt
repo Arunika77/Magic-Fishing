@@ -14,8 +14,6 @@ class MagicFishing : JavaPlugin() {
         Minigame.load(config)
         saveConfig()
         server.pluginManager.registerEvents(FishingListener(), this)
-        // Make Magic Fishing recipes encodable in NetworksExpansion encoders (if installed).
-        NetworksCompat.schedule(this)
         getCommand("magicfishing")?.let {
             val cmd = MagicFishingCommand(this)
             it.setExecutor(cmd)
