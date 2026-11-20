@@ -56,8 +56,11 @@ class FishingListener : Listener {
             return
         }
 
-        // Any other state ends this hook. Magic fish only for a hook cast by a Magic Rod, still
-        // reeled in with a baited Magic Rod (swapping rods while the hook is out does nothing).
+        // BITE / LURED happen while the hook is still out: keep the hook. Every other state
+        // (caught, reeled in, in ground, caught entity) ends it.
+        if (e.state.name == "BITE" || e.state.name == "LURED") return
+        // Magic fish only for a hook cast by a Magic Rod, still reeled in with a baited Magic Rod
+        // (swapping rods while the hook is out does nothing).
         val castWithMagicRod = magicHooks.remove(hookId)
         if (e.state != PlayerFishEvent.State.CAUGHT_FISH) return
         if (!castWithMagicRod || !Items.isRod(rod) || !Bait.isBaited(rod)) return
