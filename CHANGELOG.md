@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- **Fix**: magic fish are only caught with a hook cast by the Magic Fishing Rod itself (the rod in the hand that is actually used). A normal or enchanted rod in the other hand, or swapping rods while the hook is out, no longer gives magic fish.
+- **Fix**: the Magic Fishing Rod can't be used together with another fishing rod in the other hand. Casting is blocked (with a message) while both hands hold a fishing rod, so an enchanted vanilla rod can't be combined with the Magic Rod.
 - **Fix**: Networks Grabber (and other cargo that passes no item) no longer crashes on Magic Fishing machines.
 - **Fix**: Oil Bucket and Fuel Bucket fish now produce their bucket (Slimefun ids `BUCKET_OF_OIL` / `BUCKET_OF_FUEL`).
 - **More Slimefun fish**: the rest of the Slimefun Resources category: Sulfate, Carbon, Silicon, Compressed Carbon, Ferrosilicon, Magnesium Salt, Synthetic Sapphire, Oil Bucket, Carbon Chunk, Raw Carbonado, Synthetic Diamond, Synthetic Emerald, Fuel Bucket and Carbonado (Boosted Uranium, Nether Ice, Enriched Nether Ice, Neptunium and Plutonium are left out).

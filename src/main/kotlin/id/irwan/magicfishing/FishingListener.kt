@@ -27,47 +27,36 @@ import org.bukkit.inventory.EquipmentSlot
 
 class FishingListener : Listener {
 
-    /**
-     * Players whose last cast was made with a rod that is NOT a baited Magic Fishing Rod (e.g. an
-     * enchanted vanilla rod). Their catch stays vanilla even if they swap to the Magic Rod before
-     * reeling in. Tracked per player; if a server never fires the cast event for us, nothing is
-     * marked and catches with a baited Magic Rod work as before.
-     */
-    private val otherRodCasters: MutableSet<java.util.UUID> = java.util.concurrent.ConcurrentHashMap.newKeySet()
-
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onFish(e: PlayerFishEvent) {
         val inv = e.player.inventory
-        // The rod that is actually used, like vanilla: the main hand if it holds any fishing rod,
-        // otherwise the off hand. Only a Magic Fishing Rod in THAT hand gives magic fish, so a
-        // normal (enchanted) rod in the other hand can't be combined with the magic rod.
-        val mainHand = inv.itemInMainHand.type == Material.FISHING_ROD
+        val mainHand = Items.isRod(inv.itemInMainHand)
+        if (!mainHand && !Items.isRod(inv.itemInOffHand)) return
         val rod = if (mainHand) inv.itemInMainHand else inv.itemInOffHand
-        val playerId = e.player.uniqueId
+
+        // A Magic Fishing Rod can't be used together with another fishing rod in the other hand
+        // (e.g. an enchanted vanilla rod): casting is blocked and such a catch stays vanilla.
+        val bothHandsRods = inv.itemInMainHand.type == Material.FISHING_ROD &&
+            inv.itemInOffHand.type == Material.FISHING_ROD
 
         if (e.state == PlayerFishEvent.State.FISHING) {
-            if (!Items.isRod(rod)) {
-                // A cast with any other rod (e.g. an enchanted vanilla rod) is not a magic cast.
-                otherRodCasters.add(playerId)
-                return
-            }
             // No casting while the minigame is running, and every cast needs bait.
-            if (Minigame.isPlaying(e.player)) {
+            if (bothHandsRods) {
+                e.isCancelled = true
+                actionBar(e.player, "&cRemove the other fishing rod from your hand to use the &bMagic Fishing Rod")
+            } else if (Minigame.isPlaying(e.player)) {
                 e.isCancelled = true
             } else if (!Bait.isBaited(rod)) {
                 e.isCancelled = true
                 actionBar(e.player, "&cBait your rod first: &7click it with &6Fish Pellet &7in your inventory")
-            } else {
-                otherRodCasters.remove(playerId)
             }
             return
         }
-
         if (e.state != PlayerFishEvent.State.CAUGHT_FISH) return
-        // Magic fish only with a baited Magic Rod in the hand that is used, and not when the hook was
-        // cast with another rod (swapping rods while the hook is out gives vanilla fish).
-        if (playerId in otherRodCasters || !Items.isRod(rod) || !Bait.isBaited(rod)) return
+        if (bothHandsRods) return
         val caught = e.caught as? Item ?: return
+        // Casting needs bait, so this only happens in edge cases; then it is a normal vanilla catch.
+        if (!Bait.isBaited(rod)) return
 
         // Each fish caught uses 1 pellet. Reeling in without a fish keeps the bait.
         val left = Bait.count(rod) - 1
@@ -200,6 +189,5 @@ class FishingListener : Listener {
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         Minigame.stop(e.player, success = false, silent = true)
-        otherRodCasters.remove(e.player.uniqueId)
     }
 }
