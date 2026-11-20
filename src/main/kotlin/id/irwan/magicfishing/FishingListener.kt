@@ -27,27 +27,41 @@ import org.bukkit.inventory.EquipmentSlot
 
 class FishingListener : Listener {
 
+    /** Hooks (fishing bobbers) that were cast with a baited Magic Fishing Rod. */
+    private val magicHooks: MutableSet<java.util.UUID> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onFish(e: PlayerFishEvent) {
         val inv = e.player.inventory
-        val mainHand = Items.isRod(inv.itemInMainHand)
-        if (!mainHand && !Items.isRod(inv.itemInOffHand)) return
+        // The rod that is actually used, like vanilla: the main hand if it holds any fishing rod,
+        // otherwise the off hand. Only a Magic Fishing Rod in THAT hand gives magic fish, so a
+        // normal (enchanted) rod in the other hand can't be combined with the magic rod.
+        val mainHand = inv.itemInMainHand.type == Material.FISHING_ROD
         val rod = if (mainHand) inv.itemInMainHand else inv.itemInOffHand
+        val hookId = e.hook.uniqueId
 
         if (e.state == PlayerFishEvent.State.FISHING) {
+            if (!Items.isRod(rod)) return
             // No casting while the minigame is running, and every cast needs bait.
             if (Minigame.isPlaying(e.player)) {
                 e.isCancelled = true
             } else if (!Bait.isBaited(rod)) {
                 e.isCancelled = true
                 actionBar(e.player, "&cBait your rod first: &7click it with &6Fish Pellet &7in your inventory")
+            } else {
+                // A hook can vanish without an event (e.g. switching items); drop those now and then.
+                if (magicHooks.size > 256) magicHooks.removeIf { org.bukkit.Bukkit.getEntity(it) == null }
+                magicHooks.add(hookId)
             }
             return
         }
+
+        // Any other state ends this hook. Magic fish only for a hook cast by a Magic Rod, still
+        // reeled in with a baited Magic Rod (swapping rods while the hook is out does nothing).
+        val castWithMagicRod = magicHooks.remove(hookId)
         if (e.state != PlayerFishEvent.State.CAUGHT_FISH) return
+        if (!castWithMagicRod || !Items.isRod(rod) || !Bait.isBaited(rod)) return
         val caught = e.caught as? Item ?: return
-        // Casting needs bait, so this only happens in edge cases; then it is a normal vanilla catch.
-        if (!Bait.isBaited(rod)) return
 
         // Each fish caught uses 1 pellet. Reeling in without a fish keeps the bait.
         val left = Bait.count(rod) - 1
