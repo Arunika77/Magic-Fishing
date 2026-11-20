@@ -32,12 +32,16 @@ class MachineMenu(id: String, title: String) : BlockMenuPreset(id, title) {
      * Cargo may pull outputs. Fish inputs are placed by hand (they are never consumed); the only
      * cargo input is Fish Pellet into the Magic Aquarium pellet slot.
      */
-    override fun getSlotsAccessedByItemTransport(flow: ItemTransportFlow): IntArray {
+    override fun getSlotsAccessedByItemTransport(flow: ItemTransportFlow?): IntArray {
         val l = layout() ?: return IntArray(0)
         return if (flow == ItemTransportFlow.WITHDRAW) l.outputs else IntArray(0)
     }
 
-    override fun getSlotsAccessedByItemTransport(menu: DirtyChestMenu, flow: ItemTransportFlow, item: ItemStack): IntArray {
+    /**
+     * All parameters are nullable on purpose: other plugins (e.g. Networks' Grabber) call this
+     * with item = null when they only want to pull items out.
+     */
+    override fun getSlotsAccessedByItemTransport(menu: DirtyChestMenu?, flow: ItemTransportFlow?, item: ItemStack?): IntArray {
         val l = layout() ?: return IntArray(0)
         if (flow == ItemTransportFlow.INSERT) {
             return if (l.pelletSlot >= 0 && Items.isPellet(item)) intArrayOf(l.pelletSlot) else IntArray(0)

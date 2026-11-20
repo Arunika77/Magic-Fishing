@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Fix**: Networks Grabber (and other cargo that passes no item) no longer crashes on Magic Fishing machines.
+- **Fix**: Oil Bucket and Fuel Bucket fish now produce their bucket (Slimefun ids `BUCKET_OF_OIL` / `BUCKET_OF_FUEL`).
 - **More Slimefun fish**: the rest of the Slimefun Resources category: Sulfate, Carbon, Silicon, Compressed Carbon, Ferrosilicon, Magnesium Salt, Synthetic Sapphire, Oil Bucket, Carbon Chunk, Raw Carbonado, Synthetic Diamond, Synthetic Emerald, Fuel Bucket and Carbonado (Boosted Uranium, Nether Ice, Enriched Nether Ice, Neptunium and Plutonium are left out).
 - **Machine time**: `machines.<ID>.seconds-per-output` now accepts decimals (minimum 0.5 s, rounded to Slimefun ticks). 0 or negative values fall back to the default with a console warning. `config.yml` explains the machine options in comments. Defaults are unchanged.
 - **Compressed Magic Fish Refinery** (x8 / x16 / x32 / x64), crafted in the Compressor. Same speed as the original; each fish in the input slot is one operation per cycle, up to the multiplier, with energy multiplied by the operations that run. Output is split into valid stacks and only made if it fits. Guide: Magic Fishing > Compressed Items (slot 40). Config: `compressed.yml`.
